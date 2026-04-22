@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<<link rel="manifest" href="manifest.json">>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2d4f1e">
+    <title>Chácara Bela Vista - Pedidos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --primary: #2d4f1e; --accent: #4f772d; --cream: #fefae0; }
+        body { font-family: 'Poppins', sans-serif; background-color: #a3b18a; margin: 0; padding: 10px; display: flex; justify-content: center; }
+        .app-frame { width: 100%; max-width: 400px; background: var(--cream); border-radius: 30px; overflow: hidden; border: 4px solid var(--primary); box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
+        .hero-image { height: 140px; background: url('https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?q=80&w=800&auto=format&fit=crop') center/cover; border-bottom: 4px solid var(--accent); }
+        .content { padding: 15px; text-align: center; }
+        
+        .setup-box { background: white; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #ccd5ae; text-align: left; }
+        
+        .product-card { display: flex; align-items: center; gap: 10px; background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #eee; }
+        .egg-img { width: 50px; height: 50px; border-radius: 10px; background: url('https://images.unsplash.com/photo-1516448620398-c5f44bf9f441?q=80&w=200&auto=format&fit=crop') center/cover; }
+        
+        .price-tag { font-size: 1.5rem; font-weight: 800; color: var(--accent); margin: 10px 0; }
+        
+        .qty-selector { display: flex; align-items: center; gap: 15px; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; }
+        .btn-qty { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; font-weight: bold; padding: 0 5px; }
+        
+        .btn-main { background: #25d366; color: white; border: none; padding: 16px; border-radius: 15px; width: 100%; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px #128c7e; transition: 0.2s; }
+        .btn-main.card-style { background: #009ee3; box-shadow: 0 4px #007bb1; }
+        .btn-copy { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; font-weight: 700; cursor: pointer; margin: 10px 0; font-size: 0.95rem; box-shadow: 0 4px #3a5a21; animation: pulse 2s infinite; }
+        
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; font-size: 0.9rem; box-sizing: border-box; }
+        label { font-size: 0.6rem; font-weight: 700; color: #666; text-transform: uppercase; display: block; margin-top: 8px; }
+
+        #pix-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: white; padding: 20px; border-radius: 25px; text-align: center; max-width: 280px; width: 100%; }
+        .btn-close { background: #999; color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 700; width: 100%; margin-top: 10px; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="pix-modal">
+    <div class="modal-content">
+        <h3 style="margin:0; color: var(--primary)">Pagamento PIX</h3>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Abaixo está sua chave celular:</p>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; font-weight: bold; margin: 15px 0; border: 2px dashed var(--primary); font-size: 1.3rem; color: #333;">
+            42 99854-4143
+        </div>
+
+        <input type="text" value="42998544143" id="inputPix" style="position: absolute; left: -9999px;">
+
+        <button class="btn-copy" id="btnCopiar" onclick="copiarPix()">📋 COPIAR NÚMERO PIX</button>
+        
+        <p style="font-size: 0.7rem; color: #d62828; font-weight: 600; line-height: 1.2;">⚠️ ATENÇÃO: Após pagar, volte aqui e clique no botão verde FINALIZAR para nos enviar o comprovante!</p>
+        
+        <button class="btn-close" onclick="fecharPix()">VOLTAR AO PEDIDO</button>
+    </div>
+</div>
+
+<div class="app-frame">
+    <div class="hero-image"></div>
+    <div class="content">
+        
+        <div class="setup-box">
+            <label>👤 Seu Nome</label>
+            <input type="text" id="nome" placeholder="Nome completo">
+            
+            <label>📍 Bairro (Guarapuava)</label>
+            <select id="bairro">
+                <option value="">Selecione o bairro...</option>
+                <option value="Aldeia">Aldeia</option>
+                <option value="Alto Cascavel">Alto Cascavel</option>
+                <option value="Alto da XV">Alto da XV</option>
+                <option value="Batel">Batel</option>
+                <option value="Bonsucesso">Bonsucesso</option>
+                <option value="Boqueirão">Boqueirão</option>
+                <option value="Centro">Centro</option>
+                <option value="Conradinho">Conradinho</option>
+                <option value="Industrial">Industrial</option>
+                <option value="Santa Cruz">Santa Cruz</option>
+                <option value="Santana">Santana</option>
+                <option value="São Cristóvão">São Cristóvão</option>
+                <option value="Trianon">Trianon</option>
+                <option value="Vila Bela">Vila Bela</option>
+                <option value="Vila Carli">Vila Carli</option>
+            </select>
+
+            <label>🏠 Rua e Número</label>
+            <input type="text" id="rua" placeholder="Rua tal, nº 00">
+        </div>
+
+        <div class="product-card">
+            <div class="egg-img"></div>
+            <div style="flex:1; text-align:left">
+                <h3 style="margin:0; font-size: 0.85rem">Dúzia de Ovos</h3>
+                <p style="margin:0; font-size: 0.75rem; color: var(--accent); font-weight: bold">R$ 10,00</p>
+            </div>
+            <div class="qty-selector">
+                <button class="btn-qty" onclick="mudarQtd('duzia', -1)">-</button>
+                <span id="q-duzia">0</span>
+                <button class="btn-qty" onclick="mudarQtd('duzia', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <div class="egg-img" style="filter: saturate(2);"></div>
+            <div style="flex:1; text-align:left">
+                <h3 style="margin:0; font-size: 0.85rem">Pack Econômico (30 ovos)</h3>
+                <p style="margin:0; font-size: 0.75rem; color: var(--accent); font-weight: bold">R$ 25,00</p>
+            </div>
+            <div class="qty-selector">
+                <button class="btn-qty" onclick="mudarQtd('pack', -1)">-</button>
+                <span id="q-pack">0</span>
+                <button class="btn-qty" onclick="mudarQtd('pack', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="price-tag" id="total-val">R$ 0,00</div>
+
+        <label>💳 Forma de Pagamento</label>
+        <select id="pagamento" onchange="verificarPgto()">
+            <option value="Dinheiro">Dinheiro (na entrega)</option>
+            <option value="Pix">PIX (Copiar Chave)</option>
+            <option value="Cartão">Cartão (Pagar Agora)</option>
+        </select>
+
+        <button class="btn-main" id="btn-finalizar" onclick="enviarPedido()">🚀 FINALIZAR PEDIDO</button>
+        
+        <p style="font-size: 0.6rem; color: var(--primary); margin-top: 10px;">📍 Chácara Bela Vista - Guarapuava</p>
+    </div>
+</div>
+
+<script>
+    let carrinho = {
+        duzia: { qtd: 0, preco: 10.00 },
+        pack: { qtd: 0, preco: 25.00 }
+    };
+
+    const WHATSAPP = "5542999917302"; 
+    const LINK_MERCADO_PAGO = "https://link.mercadopago.com.br/chacarabelavistaprod";
+
+    window.onload = function() {
+        if(localStorage.getItem('bv_nome')) document.getElementById('nome').value = localStorage.getItem('bv_nome');
+        if(localStorage.getItem('bv_bairro')) document.getElementById('bairro').value = localStorage.getItem('bv_bairro');
+        if(localStorage.getItem('bv_rua')) document.getElementById('rua').value = localStorage.getItem('bv_rua');
+    }
+
+    function mudarQtd(item, n) {
+        carrinho[item].qtd = Math.max(0, carrinho[item].qtd + n);
+        document.getElementById('q-' + item).innerText = carrinho[item].qtd;
+        atualizarTotal();
+    }
+
+    function atualizarTotal() {
+        let total = (carrinho.duzia.qtd * carrinho.duzia.preco) + (carrinho.pack.qtd * carrinho.pack.preco);
+        document.getElementById('total-val').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    }
+
+    function verificarPgto() {
+        const pgto = document.getElementById('pagamento').value;
+        const btn = document.getElementById('btn-finalizar');
+        if(pgto === "Pix") document.getElementById('pix-modal').style.display = "flex";
+        
+        if(pgto === "Cartão") {
+            btn.innerHTML = "💳 PAGAR E FINALIZAR";
+            btn.classList.add('card-style');
+        } else {
+            btn.innerHTML = "🚀 FINALIZAR PEDIDO";
+            btn.classList.remove('card-style');
+        }
+    }
+
+    // FUNÇÃO DE CÓPIA REFORÇADA PARA CELULAR
+    function copiarPix() {
+        const input = document.getElementById("inputPix");
+        
+        // Seleciona o texto
+        input.select();
+        input.setSelectionRange(0, 99999); // Para mobile
+
+        try {
+            // Tenta copiar usando o comando clássico (mais compatível com mobiles antigos/navegadores dentro de apps)
+            document.execCommand("copy");
+            
+            // Tenta também a API moderna por segurança
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(input.value);
+            }
+            
+            confirmarCopia();
+        } catch (err) {
+            alert("Erro ao copiar automaticamente. Chave: 42998544143");
+        }
+    }
+
+    function confirmarCopia() {
+        const btn = document.getElementById('btnCopiar');
+        btn.innerHTML = "✅ CHAVE COPIADA!";
+        btn.style.background = "#25d366";
+        setTimeout(() => {
+            btn.innerHTML = "📋 COPIAR NÚMERO PIX";
+            btn.style.background = "var(--accent)";
+        }, 2500);
+    }
+
+    function fecharPix() { document.getElementById('pix-modal').style.display = "none"; }
+
+    function enviarPedido() {
+        const nome = document.getElementById('nome').value.trim();
+        const bairro = document.getElementById('bairro').value;
+        const rua = document.getElementById('rua').value.trim();
+        const pgto = document.getElementById('pagamento').value;
+        const totalFinal = (carrinho.duzia.qtd * carrinho.duzia.preco) + (carrinho.pack.qtd * carrinho.pack.preco);
+
+        if(!nome || !bairro || !rua) return alert("Preencha seu nome e endereço!");
+        if(totalFinal <= 0) return alert("Adicione pelo menos um produto!");
+
+        localStorage.setItem('bv_nome', nome);
+        localStorage.setItem('bv_bairro', bairro);
+        localStorage.setItem('bv_rua', rua);
+
+        let itens = "";
+        if(carrinho.duzia.qtd > 0) itens += `🥚 ${carrinho.duzia.qtd}x Dúzia%0A`;
+        if(carrinho.pack.qtd > 0) itens += `📦 ${carrinho.pack.qtd}x Pack 30%0A`;
+
+        const mensagem = `*NOVO PEDIDO - CHÁCARA BELA VISTA*%0A%0A` +
+                      `👤 *CLIENTE:* ${nome}%0A` +
+                      `📍 *BAIRRO:* ${bairro}%0A` +
+                      `🏠 *RUA:* ${rua}%0A%0A` +
+                      `🛒 *PEDIDO:*%0A${itens}%0A` +
+                      `💰 *TOTAL: R$ ${totalFinal.toFixed(2).replace('.', ',')}*%0A` +
+                      `💳 *PAGAMENTO:* ${pgto}%0A%0A` +
+                      `_App Chácara Bela Vista_ 🌿`;
+
+        if(pgto === "Cartão") window.open(LINK_MERCADO_PAGO, '_blank');
+
+        setTimeout(() => {
+            window.location.href = `https://api.whatsapp.com/send?phone=${WHATSAPP}&text=${mensagem}`;
+        }, 600);
+    }
+</script>
+</body>
+</html>
